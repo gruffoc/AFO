@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Output
+*.dat
+*.tod
+*.fit
+*.fits

@@ -4,7 +4,7 @@
 #include<random>
 
 
-#include"xorshift.h"
+//#include"xorshift.h"
 
 using namespace std;
 
