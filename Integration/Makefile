@@ -14,8 +14,9 @@ INC		:=
 %.o : %.cpp
 	$(CC) ${LIBS} ${FLAGS} -c $< -o $@
 
-${ESEGUIBILE}: ${OBJ}
-	$(CC) ${LIBS} ${FLAGS} -o $@ $^	
+${ESEGUIBILE}:${OBJ}
+	$(CC) ${LIBS} ${FLAGS} -o $@ $^ 
+	mv *.o obj/.
 
 
 .PHONY: clean

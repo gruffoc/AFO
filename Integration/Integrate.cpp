@@ -57,9 +57,9 @@ double Integrate::cubatura_naif(){
 	// Il numero di suddivisioni del range X e del range Y di integrazione. 
 	// Questo numeor ora e` settato a caso, va ottimizzato in modo da mantenere
 	// la densita` di di punti montecarlo per volumetto costante.
-	int _N_x_bins = 200;
-	int _N_y_bins = 200;
-	int _N_z_bins = 200;
+	int _N_x_bins = 300;
+	int _N_y_bins = 300;
+	int _N_z_bins = 300;
 
 	//Passo con cui mi sposto tra i volumetti
 	double dx = (_ranges[1] - _ranges[0]) / _N_x_bins;
@@ -83,36 +83,56 @@ double Integrate::cubatura_naif(){
 				std::uniform_real_distribution<> dis_y(y_i, y_f);
 				std::uniform_real_distribution<> dis_z(z_i, z_f);
 			
-				//Va definito meglio il range di z, ora fa schifo
+				// Va definito meglio il range di z, ora fa schifo
 				std::vector <double> w_v;
-				w_v.push_back(fun_(x_i,y_i,z_i));
 				w_v.push_back(fun_(x_f,y_f,z_f));
-				w_v.push_back(fun_(x_i+dx/2.,y_i+dy/2.,z_f+dz/2.));
-				w_v.push_back(fun_(x_i,y_f,z_i));
+				w_v.push_back(fun_(x_f,y_f,z_i));
 				w_v.push_back(fun_(x_f,y_i,z_f));
+				
+				w_v.push_back(fun_(x_f,y_i,z_i));
+				w_v.push_back(fun_(x_i,y_f,z_f));
+				w_v.push_back(fun_(x_i,y_f,z_i));
 
-				//z_v.push_back(fun_((x_f-x_i)/2.,(y_f-y_i)/2.));
+				w_v.push_back(fun_(x_i,y_i,z_f));
+				w_v.push_back(fun_(x_i,y_i,z_i));
+				
+				w_v.push_back(fun_(x_i+2.*dx/3.,y_i+2.*dy/3.,z_i+2.*dz/3.));
+				w_v.push_back(fun_(x_i+dx/3.,y_i+dy/3.,z_i+dz/3.));
+
+
 				double w_i = w_v[std::distance(w_v.begin(),std::max_element(std::begin(w_v), std::end(w_v)))];
 				double w_f = w_v[std::distance(w_v.begin(),std::min_element(std::begin(w_v), std::end(w_v)))];
 				double inf = w_i/10.;
 				double sup = w_f/10.;
-				std::uniform_real_distribution<> dis_w(w_i-inf, w_f+sup); 
+				std::uniform_real_distribution<> dis_w(w_i-inf, w_f+sup);
+
+				double sign=1;
+
+				for(auto vec : w_v) sign*=vec;
+
 				w_v.erase(w_v.begin(), w_v.end());
-	
-				// per ogni volumetto, il numero degli hit si deve azzerare.
-				hit=0;
-				for(int smc=0; smc < _MCSteps; smc++){
-					x = dis_x(gen_x);
-					y = dis_y(gen_y);
-					z = dis_z(gen_z);
-					w = dis_w(gen_w);
-					if( w < fun_(x,y,z) ) hit++;
+				
+				if(sign > 0) {
+					// per ogni volumetto, il numero degli hit si deve azzerare.
+					hit=0;
+					for(int smc=0; smc < _MCSteps; smc++){
+						x = dis_x(gen_x);
+						y = dis_y(gen_y);
+						z = dis_z(gen_z);
+						w = dis_w(gen_w);
+						if( w < fun_(x,y,z) ) hit++;
+					}
+					volume += dx*dy*dz*((w_f+sup)-(w_i-inf))*(double(double(hit)/double(_MCSteps))); 
+					volume += dx*dy*dz*(w_i-inf);
+				}else{
+					continue;
 				}
-				volume += dx*dy*dz*((w_f+sup)-(w_i-inf))*(double(double(hit)/double(_MCSteps))); 
-				volume += dx*dy*dz*(w_i-inf);
+
 			}
 		}
-		//cout << "Completed percentage: " << double(i)/double(_N_x_bins) << endl;
+		cout << "Completed percentage: " << double(i)/double(_N_x_bins);
+		cout << "\r";
+		cout << endl;
 	}
 
 	return volume;
