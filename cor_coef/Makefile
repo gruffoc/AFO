@@ -17,7 +17,7 @@ ESEGUIBILE	:= corr_coef.x
 CC		:= g++
 
 FLAGS 		:= -O3  -g 
-LIBS		:= -lgsl 
+LIBS		:= -lgsl -std=c++11 
 INC		:= 
 
 %.o : %.cpp
