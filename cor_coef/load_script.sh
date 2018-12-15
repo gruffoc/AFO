@@ -5,7 +5,7 @@ read TIME
 
 while true; do
 
-		LOAD=`uptime | awk {'print $8'} | awk -F "," {'print $1'} | awk -F "." {'print $1'}`
+		LOAD=`uptime | awk {'print $8'} | awk -F "," {'print $1'} | awk -F "." {'print $1'}` #non buono
 		if (( "$LOAD" < "17" )); then
 				echo $LOAD
 				nohup ./corr_coef.x 10000000 $TIME >data/time_$TIME.dat &
