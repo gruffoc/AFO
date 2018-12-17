@@ -9,6 +9,7 @@
 
 
 
+
 int main (int argc, char* argv[]){
 
   double res, err;
@@ -19,9 +20,14 @@ int main (int argc, char* argv[]){
   //
 
   double t = atof(argv[2]);
-  double dphi = 2*M_PI / 60.; 
-  double xl[6] = {0,     (M_PI/3.) - 0.002967059,  0-0.002967059, 0,     M_PI/3.-0.002967059, dphi*t - 0.002967059 }; 
-  double xu[6] = {40000, (M_PI/3.) + 0.002967059,  0+0.002967059, 40000, M_PI/3.+0.002967059, dphi*t + 0.002967059 };
+
+  double theta = 60. * M_PI / 180.; 
+  double phi   = 0.;
+  double DA    = 20. * M_PI / 180.;
+  double f = 0.01;
+
+  double xl[6] = {0,     (M_PI/3.) - 0.4,  theta-0.4, 0,     M_PI/3.-0.4, phi + DA*sin(2*M_PI*f*t)  - 0.4 }; 
+  double xu[6] = {40000, (M_PI/3.) + 0.4,  theta+0.4, 40000, M_PI/3.+0.4, phi + DA*sin(2*M_PI*f*t)  + 0.4 };
 
   const gsl_rng_type *T;
   gsl_rng *r;

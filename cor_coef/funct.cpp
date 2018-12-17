@@ -23,7 +23,7 @@ double omega(double *k){
 	// theta_b = 0.17deg - STRIP telescope W-band
 	
 	double lambda  = 0.002;
-	double omega_0 = lambda / (M_PI * 0.002967059 );
+	double omega_0 = lambda / (M_PI * 0.4 );
 	double w;
 
 	std::vector <double> r_s = { cos(k[1])*cos(k[2]), cos(k[1])*sin(k[2]), sin(k[1])    };
