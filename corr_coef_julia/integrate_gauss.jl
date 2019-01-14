@@ -1,4 +1,5 @@
 using Random
+using Statistics
 using StatsBase
 using Plots
 import Base.+
@@ -25,72 +26,118 @@ end
 
 function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, cal::Int64)
 	
+	#; Primo step, cal/3. valutazioni della funzione
 	rng = MersenneTwister(0)
 	pt = [Point{Float64}(rand(rng), rand(rng), rand(rng)) for n = 1:Int64(floor(calls/3))]
-	
-	
-	#; Cambio coordinate
+
+	#; Cambio coordinate, per mettermi nel range di integrazione scelto
 	p = ( pt .* Ref(xu-xl) ) .+ Ref(xl)
 
 	#; Valuto l'integrale
-	w = [fun(point) * (xu.x-xl.x) * (xu.y-xl.y) * (xu.z-xl.z)  for point in p ]
-	w_abs = abs.(w)
+	f = [fun(point) * (xu.x-xl.x) * (xu.y-xl.y) * (xu.z-xl.z)  for point in p ]
+	f_abs = abs.(f)
 	
-	Integral      = sum(w)/(cal/3.)
-	Integral_abs  = sum(w_abs) / (cal/3.) 
+	Integral      = sum(f .* Int64(floor(calls/3)) )/(cal/3.)
+	Integral_abs  = sum(f_abs .* Int64(floor(calls/3))) / (cal/3.) 
 
 	#; Valore dell'integrale di prova
-	Int_Vero = 5.56833
-	println("Prima Stima **Uniforme** = ",Integral-Int_Vero)
+	Int_Vero = 3.33231 * cal / 3.
+	println("Prima Stima **Uniforme** = ",(Integral-Int_Vero)/cal * 3.)
 	
 	#; Calcolo la nuova densita` di probabilita`
-	g = (w_abs ./ Integral_abs) / (cal/3)
+	g = (f_abs ./ Integral_abs)# / length(f_abs)
 	
-	println("Controllo integrale pdf = ",sum(g))
+	#println("Controllo integrale pdf = ",sum(g))
 
-	NSIDE = 3
+	NSIDE =40 
 
-	#; posso usare i pt non i p
-	#; devo trovare un modo sensato di mettere le cose
-	density = 0
-	idx_sel = []
-	for ix = (1:NSIDE)
-		for iy = (1:NSIDE)
-			for iz = (1:NSIDE)
+	#; posso fare qui la separazione dei punti nelle varie BOX
+	
+	w_m	 = zeros(Int64(NSIDE^3))
+	#coords_x = zeros(Int64(NSIDE^3))
+	Int_box  = zeros(Int64(NSIDE^3))
+	Int_abs_box = zeros(Int64(NSIDE^3))
+	control = cal / 3.	
+	dix = diy = diz = 1.0/NSIDE
+	for iter = 1:20
+		#; Organizzo la pdf nel BOX
+		for idx_g = 1:length(g)
+			box_id_x = Int64(ceil(pt[idx_g].x / dix)) -1
+			box_id_y = Int64(ceil(pt[idx_g].y / diy)) -1
+			box_id_z = Int64(ceil(pt[idx_g].z / diz)) -1
+			ID = (box_id_x) + (box_id_y)*NSIDE + (box_id_z)*NSIDE*NSIDE
+			#coords_x[ID+1] = box_id_x  * dix
+			w_m[ID+1] += g[idx_g]  
+		end
+	
+		#println("Densita` in BOX")
+		#for i in 1:length(w_m)
+			#println(w_m[i])
+		#end
+		#println("Controllo Integrale PDF = ", sum(w_m))
+		
+		#; Ma come cazzo si inizializzano????
+		#pt_2_all = Array{Point{Float64}}
+		#f_2_all  = Array{Float64,1}
+		
+		for ix = (1:NSIDE)
+			for iy = (1:NSIDE)
+				for iz = (1:NSIDE)
+					p_start = Point{Float64}((ix-1) * dix , (iy-1) * diy, (iz-1) * diz)
+					p_final = Point{Float64}(ix * dix, iy * diy, iz * diz)
 
-				for idx_g = 1:length(g)
-					#; in teoria l'ordinamento puo` avvenire anche facendo
-					#; NSIDE * pt / i[x,y,z] = N[x,y,z] , dove N[x,y,z] = indice del BOX in
-					#; x, y e z. Questo ridurrebbe al minimo le operazioni di check da fare
-					#; per posizionare un punto nella giusta BOX.
-					if pt[idx_g].x < (ix * (1/NSIDE)) && pt[idx_g].x >= ((ix-1)*(1/NSIDE))
-						if pt[idx_g].y < (iy * (1/NSIDE)) && pt[idx_g].y >= ((iy-1)*(1/NSIDE))
-							if pt[idx_g].z < (iz * (1/NSIDE)) && pt[idx_g].z >= ((iz-1)*(1/NSIDE))
-								push!(idx_sel,Int64(idx_g))
-							end
-						end
+					ID_BOX = ( (ix-1) + ( (iy-1) * NSIDE ) + ( (iz-1) * NSIDE * NSIDE ) ) + 1
+					
+					#; Densita` Uniforme
+					density    = 1/(NSIDE*NSIDE*NSIDE)
+
+					#; Densita` Pesata
+					#density    = w_m[ID_BOX]
+
+
+					hit_in_box = Int64(floor(density * (cal/3.)))
+					control    += hit_in_box
+					#println("Hit = ", hit_in_box)
+					if hit_in_box != 0
+						#println("Punti X da ", p_start.x," fino a ",p_final.x)
+						#println("Punti Y da ", p_start.y," fino a ",p_final.y)
+						#println("Punti Z da ", p_start.z," fino a ",p_final.z)
+
+						pt_2 = [Point{Float64}((p_final.x-p_start.x)*rand(rng)+p_start.x, (p_final.y-p_start.y)*rand(rng)+p_start.y,(p_final.z-p_start.z)*rand(rng)+p_start.z) for n = 1:hit_in_box]
+						#println(pt_2)
+						#; Cambio coordinate
+						p_2 = ( pt_2 .* Ref(xu-xl) ) .+ Ref(xl)
+						
+						f_2= [fun(point) * (xu.x-xl.x) * (xu.y-xl.y) * (xu.z-xl.z)  for point in p_2 ]
+							
+						append!(pt,pt_2)
+						append!(f,f_2)
+
+					else
+						continue
 					end
+					
 				end
-				g_box      = g[idx_sel]
-				density    = sum(g_box)
-				hit_in_box = density * (cal/3.)
-				println(density," ", Int64(floor(hit_in_box)))
-				
-				#p_2  = ( pt_2 .* Ref(xu-xl) ) .+ Ref(xl)
-				#w_2 = [fun(point) * (xu.x-xl.x) * (xu.y-xl.y) * (xu.z-xl.z)  for point in p_2 ]
-				idx_sel = []
 			end
 		end
+		#println("CONTROLLO: ",control)
+		Integral = sum(f) #/ ( cal / 3.)
+		Integral_abs = sum(abs.(f)) #/ ( cal / 3.  )
+
+		g = (abs.(f) ./ Integral_abs) #/ ( cal / 3. )
+		w_m     = zeros(Int64(NSIDE^3))
+	
+	
+		println("Stima *Err*\t \t = ", ( Integral / (control) ) - (Int_Vero * 3. / cal)    ) 	
+		println(length(f))
+		println(length(pt) / control)  
+
+		
 	end
-	
-	#append!(w,w_2)
-	
-	Integral = (sum(w) )/(cal/3.)
-	println(Integral-Int_Vero)
 		
 
 	
-	return Integral
+	return Integral / (control)
 end
 
 
@@ -98,14 +145,14 @@ end
 
 calls = 1000000
 
-xu = Point{Float64}(10., 10., 10.)
-xl = Point{Float64}(-10.,-10.,-10.)
+xu = Point{Float64}(1., 1., 1.)
+xl = Point{Float64}(-1.,-1.,-1.)
 
 
 
 result = Integrate(gauss_3D, xl, xu, calls)
 
-println(result)
+println("Valore dell'integrale = ", result)
 
 
 
