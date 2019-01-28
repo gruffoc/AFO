@@ -1,4 +1,4 @@
-function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::Point{Float64}, xu_p::Point{Float64}, cal::Int64, iterations::Int64, dim::Float64)
+function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::Point{Float64}, xu_p::Point{Float64}, cal::Int64, iterations::Int64, dim::Float64, time_stamp::Float64)
 
 	# First Step: cal evaluations of the integrand using uniform distributed random number
 	rng = MersenneTwister(0)
@@ -16,7 +16,7 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 	density_unif = 1. / (Int64(floor(3. * calls)))
 
 	# Integrand evaluations
-	f = [fun(p[i],p_p[i]) * J_t * density_unif  for i = 1:Int64(floor(3. * cal)) ]
+	f = [fun(p[i], p_p[i], time_stamp) * J_t * density_unif  for i = 1:Int64(floor(3. * cal)) ]
 	f_abs = abs.(f)
 
 	# Perform the summation of intergrand and its absolute value
@@ -115,7 +115,7 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 									p_2 = ( pt_2 .* Ref(xu-xl) ) .+ Ref(xl)
 									p_p_2 = ( pt_p_2 .* Ref(xu_p-xl_p) ) .+ Ref(xl_p)
 									# Aggiustare quel /density!!!!!! Non e` conforme con quello sopra!!!!
-									f_2 = [fun(p_2[i],p_p_2[i]) * J_t / density  for i = 1:hit_in_box ]
+									f_2 = [fun(p_2[i], p_p_2[i], time_stamp) * J_t / density  for i = 1:hit_in_box ]
 
 
 									append!(pt_2_all, pt_2)

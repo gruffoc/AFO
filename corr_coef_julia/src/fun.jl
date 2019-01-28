@@ -24,8 +24,13 @@ function Tₚ(p::Point{Float64})
 end
 
 # Distribution of turbulent structures on the atmosphere
-function χ₁(p::Point{Float64}, p_p::Point{Float64})
-	dr = diff_cart(p, p_p)
+function χ₁(p::Point{Float64}, p_p::Point{ Float64}, t_s::Float64)
+	W        = Point{Float64}(25, 0, π+(π/4), undef, undef, undef)()
+	W_incr   = Point{Float64}(0.0, 0.0, 0.0, W.x*t_s, W.y*t_s, 0)
+	p_wind   = Point{Float64}(0.0, 0.0, 0.0, p.x-W_incr.x, p.y-W_incr.y, p.z)
+	p_p_wind = Point{Float64}(0.0, 0.0, 0.0, p_p.x-W_incr.x, p_p.y-W_incr.y, p_p.z)
+	dr = diff_cart(p_wind, p_p_wind)
+
 	dr_mod = (dr.x^2 + dr.y^2 + dr.z^2)^0.5
 	return χ₁_0 * exp(- ( (dr_mod)^2 / (2*(L₀)^2) ) )
 end
@@ -51,6 +56,6 @@ end
 
 # Integrand of correlation coef
 
- function corr(p::Point{Float64}, p_p::Point{Float64})
- 	return B(p) * B(p_p) * χ₁(p, p_p) * χ₂(p, p_p) * Tₚ(p) * Tₚ(p_p) * Jac_Sp(p) * Jac_Sp(p_p) * (1/p.r) * (1/p_p.r)
+function corr(p::Point{Float64}, p_p::Point{Float64}, time_stamp::Float64)
+ 	return B(p) * B(p_p) * χ₁(p, p_p, time_stamp) * χ₂(p, p_p) * Tₚ(p) * Tₚ(p_p) * Jac_Sp(p) * Jac_Sp(p_p) * (1/p.r) * (1/p_p.r)
 end

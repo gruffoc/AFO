@@ -31,7 +31,7 @@ Step_start = Start_Time / dt
 Step_stop  = Stop_Time / dt
 
 
-time = Array{Float64, 1}(undef, 0)
+time_s = Array{Float64, 1}(undef, 0)
 Coo  = Array{Float64, 1}(undef, 0)
 
 
@@ -48,20 +48,20 @@ start = Dates.value(Dates.now())
 for t = Step_start:Step_stop
     xu_p = Point{Float64}(-L₀, (2. / .5)*π + θᵦ, (Φ₀ + (t*dt) * vₛ) + θᵦ, undef, undef, undef)
     xl_p = Point{Float64}(L₀, (2. / .5)*π - θᵦ, (Φ₀ + (t*dt) * vₛ) - θᵦ, undef, undef ,undef)
-    result = Integrate(corr, xl, xu, xl_p, xu_p, calls, it, dimensions)
-    #println(t*dt," ", result)
-    append!(time, t*dt)
+    result = Integrate(corr, xl, xu, xl_p, xu_p, calls, it, dimensions, 0.0)
+    println(t*dt," ", result)
+    append!(time_s, t*dt)
     append!(Coo, result)
 end
 
-ord = sortperm(time)
-time = time[ord]
+ord = sortperm(time_s)
+time_s = time_s[ord]
 Coo  = Coo[ord]
 
 # Print to file
 f = open(file_name, "w")
-for j = 1:min(length(Coo), length(time))
-    println(f, time[j], " ", Coo[j])
+for j = 1:min(length(Coo), length(time_s))
+    println(f, time_s[j], " ", Coo[j])
 end
 close(f)
 
