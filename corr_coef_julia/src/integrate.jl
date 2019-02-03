@@ -40,6 +40,17 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 	Int_abs_box = zeros(Int64(NBIN^dim))
 	dix = diy = diz = div = diw = dik = 1.0/NBIN
 	Integral_avg = 0
+
+
+
+	# Box_R = Array{Float64}(undef, 0)
+	# Box_T = Array{Float64}(undef, 0)
+	# Box_P = Array{Float64}(undef, 0)
+	#
+	# Box_R_P = Array{Float64}(undef, 0)
+	# Box_T_P = Array{Float64}(undef, 0)
+	# Box_P_P = Array{Float64}(undef, 0)
+
 	for iter = 1:iterations
 		# Evaluate the weigth on each BOX
 		for idx_g = 1:length(g)
@@ -96,6 +107,7 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 
 
 								hit_in_box = Int64(floor(density * (3. * cal)))
+
 								total_hits += hit_in_box
 								#println("Hit = ", hit_in_box)
 								if hit_in_box != 0
@@ -123,6 +135,15 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 
 									append!(f_2_all, f_2)
 
+									# append!(Box_R, ix)
+									# append!(Box_T, iy)
+									# append!(Box_P, iz)
+									#
+									# append!(Box_R_P, iv)
+									# append!(Box_T_P, iw)
+									# append!(Box_P_P, ik)
+
+
 								else
 									continue
 								end
@@ -142,6 +163,37 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 
 		#println(iter,". Integral = ", Integral / (iter + 1)  )
 		Integral_avg = Integral / (iter+1)
+		# println("#######################################################################")
+		# println( "r_min = ",     ((findmin(Box_R)[1]-1)/NBIN * (xu.r-xl.r)) + xl.r   )
+		# println( "r_max = ",    ((findmax(Box_R)[1])/NBIN * (xu.r-xl.r)) + xl.r  )
+		#
+		# println( "θ_min = ",   ((findmin(Box_T)[1]-1)/NBIN * (xu.θ-xl.θ)) + xl.θ   )
+		# println( "θ_max = ",    ((findmax(Box_T)[1])/NBIN * (xu.θ-xl.θ)) + xl.θ  )
+		#
+		# println( "ϕ_min = ",    ((findmin(Box_P)[1]-1)/NBIN * (xu.ϕ-xl.ϕ)) + xl.ϕ   )
+		# println( "ϕ_min = ",   ((findmax(Box_P)[1])/NBIN * (xu.ϕ-xl.ϕ)) + xl.ϕ  )
+		#
+		# println("################################## PRIMED #############################")
+		#
+		# println( "r_min = ",   ((findmin(Box_R_P)[1]-1)/NBIN * (xu_p.r-xl_p.r)) + xl_p.r   )
+		# println( "r_max = ",    ((findmax(Box_R_P)[1])/NBIN * (xu_p.r-xl_p.r)) + xl_p.r  )
+		#
+		# println( "θ_min = ",   ((findmin(Box_T_P)[1]-1)/NBIN * (xu_p.θ-xl_p.θ)) + xl_p.θ   )
+		# println( "θ_max = ",   ((findmax(Box_T_P)[1])/NBIN * (xu_p.θ-xl_p.θ)) + xl_p.θ  )
+		#
+		# println( "ϕ_min = ",   ((findmin(Box_P_P)[1]-1)/NBIN * (xu_p.ϕ-xl_p.ϕ)) + xl_p.ϕ   )
+		# println( "ϕ_max = ",   ((findmax(Box_P_P)[1])/NBIN * (xu_p.ϕ-xl_p.ϕ)) + xl_p.ϕ  )
+		# println("#######################################################################")
+		#
+		# Box_R = Array{Float64}(undef, 0)
+		# Box_T = Array{Float64}(undef, 0)
+		# Box_P = Array{Float64}(undef, 0)
+		#
+		# Box_R_P = Array{Float64}(undef, 0)
+		# Box_T_P = Array{Float64}(undef, 0)
+		# Box_P_P = Array{Float64}(undef, 0)
+
+
 
 	end
 
