@@ -71,7 +71,7 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, cal::I
 
 	#println(1+log(2,cal/2.) + log(2, 1+skewness(g)/((6*(cal/2. -2)/((cal/2. + 1)*(cal/2. + 2)))^0.5)  ) )
 
-	NSIDE = 100
+	NSIDE = 1000
 
 	#; posso fare qui la separazione dei punti nelle varie BOX
 
@@ -86,7 +86,7 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, cal::I
 	Box_Y = Array{Float64}(undef, 0)
 
 
-	for iter = 1:3
+	for iter = 1:20
 
 		#; Organizzo la pdf nel BOX
 		for idx_g = 1:length(g)
@@ -141,7 +141,7 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, cal::I
 					append!(Box_X, ix)
 					append!(Box_Y, iy)
 
-					println("Box = ", ix, " ", iy)
+					#println("Box = ", ix, " ", iy)
 
 
 
@@ -176,23 +176,23 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, cal::I
 
 
 
-		println("Per le X")
-		println(      ((findmin(Box_X)[1]-1)/100 * (xu.x-xl.x)) + xl.x   )
-		println(      ((findmax(Box_X)[1])/100 * (xu.x-xl.x)) + xl.x  )
-
-		println("Per le Y")
-		println(((findmin(Box_Y)[1]-1)/100 * (xu.x-xl.x)) + xl.x)
-		println(((findmax(Box_Y)[1])/100 * (xu.x-xl.x)) + xl.x )
-
-		xu_n = Point{Float64}(((findmax(Box_X)[1])/100 * (xu.x-xl.x)) + xl.x, ((findmax(Box_Y)[1])/100 * (xu.x-xl.x)) + xl.x     )
-		xl_n = Point{Float64}(((findmin(Box_X)[1])/100 * (xu.x-xl.x)) + xl.x, ((findmin(Box_Y)[1])/100 * (xu.x-xl.x)) + xl.x     )
-
-		xu = xu_n
-		xl = xl_n
-
-		println(xu)
-		Box_X = Array{Float64}(undef, 0)
-		Box_Y = Array{Float64}(undef, 0)
+		# println("Per le X")
+		# println(      ((findmin(Box_X)[1]-1)/100 * (xu.x-xl.x)) + xl.x   )
+		# println(      ((findmax(Box_X)[1])/100 * (xu.x-xl.x)) + xl.x  )
+		#
+		# println("Per le Y")
+		# println(((findmin(Box_Y)[1]-1)/100 * (xu.x-xl.x)) + xl.x)
+		# println(((findmax(Box_Y)[1])/100 * (xu.x-xl.x)) + xl.x )
+		#
+		# # xu_n = Point{Float64}(((findmax(Box_X)[1])/100 * (xu.x-xl.x)) + xl.x, ((findmax(Box_Y)[1])/100 * (xu.x-xl.x)) + xl.x     )
+		# # xl_n = Point{Float64}(((findmin(Box_X)[1])/100 * (xu.x-xl.x)) + xl.x, ((findmin(Box_Y)[1])/100 * (xu.x-xl.x)) + xl.x     )
+		# #
+		# # xu = xu_n
+		# # xl = xl_n
+		#
+		# println(xu)
+		# Box_X = Array{Float64}(undef, 0)
+		# Box_Y = Array{Float64}(undef, 0)
 
 
 	end #end iteration
@@ -203,18 +203,18 @@ end
 
 #################### Integration #####################
 
-calls = 1000000
+calls = 100000
 
-xu = Point{Float64}(100., 100.)
-xl = Point{Float64}(-100.,-100.)
+xu = Point{Float64}(1., 1.)
+xl = Point{Float64}(-1.,-1.)
 
 
 
 result,x,y = Integrate(cilindro, xl, xu, calls)
-plot(x,y, seriestype=:scatter, xlims=(-3,3), ylims=(-3,3))
+plot(x,y, seriestype=:scatter)
 
 #println("Valore dell'integrale = ", result)
 
 
-# il punto e` che gli estremo di integrazione devono essere rimodellati
+# il punto e` che gli estremi di integrazione devono essere rimodellati
 # dove la funzione non e` diversa da zero!

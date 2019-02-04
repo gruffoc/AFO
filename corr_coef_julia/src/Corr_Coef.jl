@@ -17,6 +17,10 @@ calls = Int64(1E3)
 it    = 5
 dimensions = 6.
 
+Δₐ = 0.25
+ss = 0.017 #0.02 rad  / sec
+
+fₛ = ss / Δₐ
 
 
 Φₛ = π/2         # start point
@@ -24,7 +28,7 @@ vₛ = 2*π / 60.   # speed rad/sec
 dt = 0.3         # Time interval
 
 Start_Time = 0   #parse(Float64, ARGS[1])
-Stop_Time  = 30 #parse(Float64, ARGS[2])
+Stop_Time  = 35 #parse(Float64, ARGS[2])
 file_name  = "ciao.txt" #ARGS[3]
 
 Step_start = Start_Time / dt
@@ -38,8 +42,8 @@ Coo  = Array{Float64, 1}(undef, 0)
 
 
 
-xu = Point{Float64}(4000.0,  π/4 + θᵦ, Φₛ + θᵦ, undef, undef, undef)
-xl = Point{Float64}(0.,      π/4 - θᵦ,  Φₛ -  θᵦ, undef, undef, undef )
+xu = Point{Float64}(4000.0,  π/(4.5) + θᵦ, Φₛ + θᵦ, undef, undef, undef)
+xl = Point{Float64}(0.,      π/(4.5) - θᵦ,  Φₛ - θᵦ, undef, undef, undef )
 
 start = Dates.value(Dates.now())
 
@@ -51,8 +55,8 @@ for t = Step_start:Step_stop
     # Rivedere gli estremi di integrazione.
     # xu_p = Point{Float64}(5035.,   2.8902652413026098,  (Φₛ + vₛ*t*dt) + θᵦ, undef, undef, undef)
     # xl_p = Point{Float64}(0.,     0.12566370614359174,  (Φₛ + vₛ*t*dt) - θᵦ , undef, undef ,undef)
-    xu_p = Point{Float64}(4000.,   π/4 + θᵦ,  (Φₛ + 0.2*sin(2*π*0.05*t*dt)) + θᵦ, undef, undef, undef)
-    xl_p = Point{Float64}(0.,      π/4 - θᵦ,  (Φₛ + 0.2*sin(2*π*0.05*t*dt)) - θᵦ , undef, undef ,undef)
+    xu_p = Point{Float64}(4000.,   π/(4.5) + θᵦ,  (Φₛ + (Δₐ/2)*sin(2*π*fₛ*t*dt)) + θᵦ, undef, undef, undef)
+    xl_p = Point{Float64}(0.,      π/(4.5) - θᵦ,  (Φₛ + (Δₐ/2)*sin(2*π*fₛ*t*dt)) - θᵦ , undef, undef ,undef)
     result = Integrate(corr, xl, xu, xl_p, xu_p, calls, it, dimensions, tempo )
     println(t*dt," ", result)
     append!(time_s, t*dt)
@@ -71,7 +75,7 @@ Coo  = Coo[ord]
 # end
 # close(f)
 
-plot(time_s, Coo/findmax(Coo)[1], seriestype=:scatter)
+plot(time_s, Coo/findmax(Coo)[1], seriestype=:scatter, ylims=(0,1.1))
 #
 # using DSP
 # period = periodogram(Coo, fs=1)
