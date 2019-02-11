@@ -51,6 +51,11 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 	# Box_T_P = Array{Float64}(undef, 0)
 	# Box_P_P = Array{Float64}(undef, 0)
 
+	# HIT = Array{Float64}(undef, 0)
+
+	chi_square = 0
+
+
 	for iter = 1:iterations
 		# Evaluate the weigth on each BOX
 		for idx_g = 1:length(g)
@@ -112,6 +117,7 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 								#println("Hit = ", hit_in_box)
 								if hit_in_box != 0
 
+
 									x_ran = (p_final.r-p_start.r)
 									y_ran = (p_final.θ-p_start.θ)
 									z_ran = (p_final.ϕ-p_start.ϕ)
@@ -142,6 +148,7 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 									# append!(Box_R_P, iv)
 									# append!(Box_T_P, iw)
 									# append!(Box_P_P, ik)
+									# append!(HIT,hit_in_box)
 
 
 								else
@@ -163,6 +170,9 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 
 		#println(iter,". Integral = ", Integral / (iter + 1)  )
 		Integral_avg = Integral / (iter+1)
+		chi_square += (sum(f_2_all) / (total_hits * NBIN^6 ) - Integral_avg)^2
+
+
 		# println("#######################################################################")
 		# println( "r_min = ",     ((findmin(Box_R)[1]-1)/NBIN * (xu.r-xl.r)) + xl.r   )
 		# println( "r_max = ",    ((findmax(Box_R)[1])/NBIN * (xu.r-xl.r)) + xl.r  )
@@ -185,6 +195,7 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 		# println( "ϕ_max = ",   ((findmax(Box_P_P)[1])/NBIN * (xu_p.ϕ-xl_p.ϕ)) + xl_p.ϕ  )
 		# println("#######################################################################")
 		#
+		#
 		# Box_R = Array{Float64}(undef, 0)
 		# Box_T = Array{Float64}(undef, 0)
 		# Box_P = Array{Float64}(undef, 0)
@@ -199,5 +210,5 @@ function Integrate(fun::Function, xl::Point{Float64}, xu::Point{Float64}, xl_p::
 
 
 
-	return Integral_avg
+	return Integral_avg, chi_square #, HIT
 end

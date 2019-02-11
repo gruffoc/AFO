@@ -25,7 +25,7 @@ end
 
 # Distribution of turbulent structures on the atmosphere
 function χ₁(p::Point{Float64}, p_p::Point{ Float64}, t_s::Float64)
-	W        = Point{Float64}(45, 0, (π/2)+(π/(10.5)), undef, undef, undef)()
+	W        = Point{Float64}(45, 0, (π/2)+(π/(7.0)), undef, undef, undef)()
 	W_incr   = Point{Float64}(0.0, 0.0, 0.0, W.x*t_s, W.y*t_s, 0)
 	dr = diff_cart(p, p_p)
 	dr_mod = ((dr.x-W_incr.x)^2 + (dr.y-W_incr.y)^2 + dr.z^2)^0.5
